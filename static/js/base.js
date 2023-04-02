@@ -1,55 +1,119 @@
-// Create a "close" button and append it to each list item
-var myNodelist = document.getElementsByTagName("LI");
-var i;
-for (i = 0; i < myNodelist.length; i++) {
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  myNodelist[i].appendChild(span);
-}
+$(document).ready(function () {
+    getTodos()
+    
+    function getTodos(){
+        const url = 'todo/read'
 
-// Click on a close button to hide the current list item
-var close = document.getElementsByClassName("close");
-var i;
-for (i = 0; i < close.length; i++) {
-  close[i].onclick = function() {
-    var div = this.parentElement;
-    div.style.display = "none";
-  }
-}
-
-// Add a "checked" symbol when clicking on a list item
-var list = document.querySelector('ul');
-list.addEventListener('click', function(ev) {
-  if (ev.target.tagName === 'LI') {
-    ev.target.classList.toggle('checked');
-  }
-}, false);
-
-// Create a new list item when clicking on the "Add" button
-function newElement() {
-  var li = document.createElement("li");
-  var inputValue = document.getElementById("myInput").value;
-  var t = document.createTextNode(inputValue);
-  li.appendChild(t);
-  if (inputValue === '') {
-    alert("You must write something!");
-  } else {
-    document.getElementById("myUL").appendChild(li);
-  }
-  document.getElementById("myInput").value = "";
-
-  var span = document.createElement("SPAN");
-  var txt = document.createTextNode("\u00D7");
-  span.className = "close";
-  span.appendChild(txt);
-  li.appendChild(span);
-
-  for (i = 0; i < close.length; i++) {
-    close[i].onclick = function() {
-      var div = this.parentElement;
-      div.style.display = "none";
+        $.ajax({
+            url: url,
+            method: "GET",
+            contentType: "application/json",
+        }).done(function (todos) {
+            loadTodos(todos)
+        });
     }
-  }
-}
+
+    function loadTodos(todos){
+        for (const todo of todos) {
+            todoText = '<span>'+todo.todo+'</span>'
+            todoDone = '<input class="form-check-input me-2" type="checkbox" value="" />'
+            if(todo.is_done == 1){
+                todoText = '<span><s>'+todo.todo+'</s></span>'
+                $(todoText).css('text-decoration-line','overline')
+                todoDone = '<input class="form-check-input me-2" type="checkbox" value="" checked />'
+            }
+            $('#todoContainer').append('<li\
+                class="list-group-item d-flex justify-content-between align-items-center border-start-0 border-top-0 border-end-0 border-bottom rounded-0 mb-2">\
+                <div class="d-flex align-items-center">\
+                '+todoDone+'\
+                '+todoText+'\
+                </div>\
+                <a href="#!" data-mdb-toggle="tooltip" title="Remove item">\
+                <i class="fas fa-times text-primary"></i>\
+                </a>\
+            </li>')
+            }
+
+            $('input:checkbox').change(function(){
+                spanEle = $(this).parent().children('span')
+                todoText = $(spanEle).text()
+                checked = $(this).is(":checked")
+                if(checked){
+                    $(spanEle).html('<s>'+todoText+'</s>')
+                } else {
+                    $(spanEle).html(todoText)
+                }
+
+                const url = 'todo/update'
+
+                const data = {
+                    "todo": String(todoText),
+                    "is_done": Number(checked),
+                    "created": new Date()
+                }
+
+                var inputData = JSON.stringify(data)
+
+                $.ajax({
+                    url: url,
+                    method: "POST",
+                    data: inputData,
+                    dataType: "json",
+                    contentType: "application/json",
+                }).done(function (result) {
+                });
+                
+                
+            })
+
+    }
+
+    
+    $('#btnAdd').click(function () {
+        const url = 'todo/add'
+
+        const data = {
+            "todo": String($('#txtTodo').val()),
+            "is_done": 0,
+            "created": new Date()
+        }
+
+        var inputData = JSON.stringify(data)
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: inputData,
+            dataType: "json",
+            contentType: "application/json",
+        }).done(function (result) {
+            $('#txtTodo').val('')
+            $('#todoContainer').empty()
+            loadTodos()
+        });
+    })
+
+    $('#btnConnect').click(function () {
+        const url = 'connect_to_db'
+
+        const data = {
+            "serverName": String($('#txtServerName').val()),
+            "admin": String($('#txtAdmin').val()),
+            "password": String($('#txtPassword').val()),
+        }
+
+        var inputData = JSON.stringify(data)
+
+        $.ajax({
+            url: url,
+            method: "POST",
+            data: inputData,
+            dataType: "json",
+            contentType: "application/json",
+        }).done(function (result) {
+            $('#result').append('  <div class="alert alert-primary" role="alert">\
+            DB Connection Success!\
+          </div>')
+        });
+    })
+});
