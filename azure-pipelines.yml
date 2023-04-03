@@ -10,8 +10,8 @@ pool:
   vmImage: ubuntu-latest
 strategy:
   matrix:
-    Python38:
-      python.version: '3.8'
+    Python39Test:
+      python.version: '3.9'
 
 steps:
 - task: UsePythonVersion@0
@@ -20,13 +20,18 @@ steps:
   displayName: 'Use Python $(python.version)'
 
 - script: |
-    python -m venv env
-    source env/bin/activate
+    python -m venv atenv
+    source atenv/bin/activate
     python -m pip install --upgrade pip
     pip install -r requirements.txt
-    sudo apt-get install -y unixodbc-dev libgssapi-krb5-2 odbcinst1debian2
-    sudo dpkg -i msodbcsql17_17.7.2.1-1_amd64.deb
-  displayName: 'Install dependencies'
+  displayName: 'Install dependencies(Python)'
+
+- script: |
+    sudo apt-get update
+    sudo apt-get install -y unixodbc-dev libgssapi-krb5-2 odbcinst1debian2 msodbcsql17
+  # sudo dpkg -i msodbcsql17_17.7.2.1-1_amd64.deb
+  displayName: 'Install dependencies(Ubuntu)'
+
 
 # - script: |
 #     pip install pytest pytest-azurepipelines
