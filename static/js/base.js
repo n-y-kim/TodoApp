@@ -9,6 +9,7 @@ $(document).ready(function () {
             method: "GET",
             contentType: "application/json",
         }).done(function (todos) {
+            console.log(todos)
             loadTodos(todos)
         });
     }
@@ -89,7 +90,7 @@ $(document).ready(function () {
         }).done(function (result) {
             $('#txtTodo').val('')
             $('#todoContainer').empty()
-            loadTodos()
+            getTodos()
         });
     })
 
