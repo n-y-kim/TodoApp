@@ -5,7 +5,7 @@ from typing import List
 from model.models import Todo
 from pydantic import parse_obj_as
 
-database = 'basic-workshop'
+database = 'appservicedb'
 driver = '{ODBC Driver 17 for SQL Server}'
 
 def get_config():
